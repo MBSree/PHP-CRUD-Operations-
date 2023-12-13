@@ -1,30 +1,32 @@
-<?php 
-class Validation {
+<?php
+class Validation
+{
 
 	public const ALLOWED_DOMAINS = ['gmail.com', 'outlook.com', 'evalan.com'];
 
-//try to use in_array function instead of using explode
-	 function isAllowedDomain($email)
+	//try to use in_array function instead of using explode
+	public function isAllowedDomain($email)
 	{
-	   
-	    $emailParts = explode('@', $email);
-	    $domain = end($emailParts);
-	    return in_array($domain, self::ALLOWED_DOMAINS);
+
+		$emailParts = explode('@', $email);
+		$domain = end($emailParts);
+		return in_array($domain, self::ALLOWED_DOMAINS);
 	}
 
-	function isUniqueEmail($email, $id, $conn)
+	public function isUniqueEmail($email, $id, $conn)
 	{
-    $stmt = $conn->prepare("SELECT id FROM employee WHERE email = ? AND id != ?");
-    $stmt->bind_param("si", $email, $id);
-    $stmt->execute();
-    $stmt->store_result();
-    $count = $stmt->num_rows;
-    $stmt->close();
+		$stmt = $conn->prepare("SELECT id FROM employee WHERE email = ? AND id != ?");
+		$stmt->bind_param("si", $email, $id);
+		$stmt->execute();
+		$stmt->store_result();
+		$count = $stmt->num_rows;
+		$stmt->close();
 
-    return $count === 0;
+		return $count === 0;
 	}
 
-	function isValidPassword($password){
+	public function isValidPassword($password)
+	{
 		$minLength = 6;
 		$maxLength = 20;
 		if (strlen($password) < $minLength || strlen($password) > $maxLength) {
@@ -45,7 +47,8 @@ class Validation {
 		return true;
 	}
 
-	function isValidPhoneNumber($phoneNumber) {
+	public function isValidPhoneNumber($phoneNumber)
+	{
 		$pattern = '/^\d{10}$/';
 		return preg_match($pattern, $phoneNumber);
 	}
@@ -66,6 +69,3 @@ class Validation {
 //interfaces in php
 //abstract classes
 // inheritance
-
-
-?>
