@@ -22,6 +22,7 @@
 					<th scope="col">EMail Id</th>
 					<th scope="col">Password</th>
 					<th scope="col">Address</th>
+					<th scope="col">Country Code</th>
 					<th scope="col">Phone Number</th>
 					<th scope="col">Operation</th>
 
@@ -38,6 +39,7 @@
 						$email = $row['email'];
 						$password = $row['password'];
 						$address = $row['address'];
+						$region=$row['countrycode'];
 						$phonenumber = $row['phonenumber'];
 						echo "<tr>
       <th scope='row'>$id</th>
@@ -45,6 +47,7 @@
       <td>" . $email . "</td>
       <td>" . $password . "</td>
       <td>" . $address . "</td>
+	  <td>+" . $region . "</td>
       <td>" . $phonenumber . "</td>
       <td>
       	<button style='background-color: #32CD32;'><a href='update.php?updateid=".$id."' class='text-light'>Update</a></button>
