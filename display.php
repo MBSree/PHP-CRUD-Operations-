@@ -47,7 +47,7 @@
       <td>" . $email . "</td>
       <td>" . $password . "</td>
       <td>" . $address . "</td>
-	  <td>+" . $region . "</td>
+	  <td>" . $region . "</td>
       <td>" . $phonenumber . "</td>
       <td>
       	<button style='background-color: #32CD32;'><a href='update.php?updateid=".$id."' class='text-light'>Update</a></button>
