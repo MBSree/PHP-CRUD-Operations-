@@ -1,20 +1,21 @@
-<?php 
-include("connection.php"); 
+<?php
+include("connection.php");
 include("Validation.php");
 ?>
 
 <?php
-$id=$_GET['updateid'];
+$id = $_GET['updateid'];
 $query = "SELECT * from employee where id=$id";
 $data = mysqli_query($conn, $query);
-$row=mysqli_fetch_assoc($data);
-$username=$row['username'];
-$email=$row['email'];
-$password=$row['password'];
-$address=$row['address'];
-$phonenumber=$row['phonenumber'];
+$row = mysqli_fetch_assoc($data);
+$username = $row['username'];
+$email = $row['email'];
+$password = $row['password'];
+$address = $row['address'];
+$countrycode = $row['countrycode'];
+$phonenumber = $row['phonenumber'];
 
-$validationObject = new Validation();
+// $validationObject = new Validation();
 
 // $allowedDomains = array('gmail.com', 'outlook.com', 'evalan.com');
 
@@ -76,24 +77,25 @@ if (isset($_POST['submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $address = $_POST['address'];
+    $countrycode = $_POST['countrycode'];
     $phonenumber = $_POST['phonenumber'];
 
-    $isValidEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
-    // $isAllowedDomain = isAllowedDomain($email);
-    // $isUniqueEmail = isUniqueEmail($email, $id, $conn);
-    // $isValidPassword = isValidPassword($password);
-    // $isValidPhoneNumber = isValidPhoneNumber($phonenumber);
-    $isAllowedDomain = $validationObject->isAllowedDomain($email);
-    $isUniqueEmail = $validationObject->isUniqueEmail($email, $id, $conn);
-    $isValidPassword = $validationObject->isValidPassword($password);
-    $isValidPhoneNumber = $validationObject->isValidPhoneNumber($phonenumber);
+    $ValidEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
+    $isAllowedDomain = isValidEmail($email);
+    $isUniqueEmail = isUniqueEmail($email, $id, $conn);
+    $isValidPassword = isValidPassword($password);
+    $isValidPhoneNumber = isValidPhoneNumber($phonenumber, $countrycode);
+    // $isAllowedDomain = $validationObject->isAllowedDomain($email);
+    // $isUniqueEmail = $validationObject->isUniqueEmail($email, $id, $conn);
+    // $isValidPassword = $validationObject->isValidPassword($password);
+    // $isValidPhoneNumber = $validationObject->isValidPhoneNumber($phonenumber);
 
-    if (!$isValidEmail) {
-        echo "<script>alert('Invalid email address.');</script>";
-    }
+    // if (!$isValidEmail) {
+    //     echo "<script>alert('Invalid email address.');</script>";
+    // }
 
     if (!$isAllowedDomain) {
-        echo "<script>alert('Sorry, registration is only allowed for specific email domains of ". implode(', ', Validation::ALLOWED_DOMAINS) . ".');</script>";
+        echo "<script>alert('Sorry, registration is only allowed for specific email domains of " . implode(',', $allowedDomains) .  ".');</script>";
     }
 
     if (!$isUniqueEmail) {
@@ -104,18 +106,17 @@ if (isset($_POST['submit'])) {
         echo "<script>alert('Password must be between 6 and 20 characters and contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special character.');</script>";
     }
 
-    if (!$isValidPhoneNumber){
+    if (!$isValidPhoneNumber) {
         echo "<script>alert('Invald Phone Number.');</script>";
     }
 
-    if ($isValidEmail && $isAllowedDomain && $isUniqueEmail && $isValidPassword && $isValidPhoneNumber) {
-        $query = "UPDATE employee SET id='$id', username='$username', email='$email', password='$password', address='$address', phonenumber='$phonenumber' where id=$id";
+    if ($ValidEmail && $isAllowedDomain && $isUniqueEmail && $isValidPassword && $isValidPhoneNumber) {
+        $query = "UPDATE employee SET id='$id', username='$username', email='$email', password='$password', address='$address', countrycode='$countrycode', phonenumber='$phonenumber' where id=$id";
         $result = mysqli_query($conn, $query);
         if ($result) {
-        //echo "data updated";
+            //echo "data updated";
             //echo "<script>alert('Data updation is successfull.');</script>";
             header('location:display.php');
-            
         } else {
             echo "<script>alert('Data not updated. Failed!!!');</script>";
         }
@@ -136,6 +137,11 @@ if (isset($_POST['submit'])) {
 
     <title>PHP CRUD Operations</title>
 </head>
+<style>
+    select {
+        padding: 5px;
+    }
+</style>
 
 <body>
     <div class="container my-5">
@@ -158,16 +164,35 @@ if (isset($_POST['submit'])) {
 
             <div class="form-group">
                 <label>Address</label>
-                <input type="text" class="form-control" placeholder="Enter your address" name="address" autocomplete="off" value= <?php echo $address; ?> required>
+                <input type="text" class="form-control" placeholder="Enter your address" name="address" autocomplete="off" value=<?php echo $address; ?> required>
             </div>
 
             <div class="form-group">
                 <label>Phone Number</label>
-                <input type="text" class="form-control" placeholder="Enter your phone Number" name="phonenumber" autocomplete="off" value=<?php echo $phonenumber; ?> required>
+                <div class="input-field">
+                    <select name="countrycode" class="form-control">
+                        <option disabled="disabled" value="">Country Code</option>
+                        <?php
+                        include 'vendor/autoload.php';
+
+                        use libphonenumber\PhoneNumberUtil;
+
+                        $phoneUtil = PhoneNumberUtil::getInstance();
+                        $regions = $phoneUtil->getSupportedRegions();
+                        foreach ($regions as $region) {
+                            $selected = ($countrycode == $region) ? 'selected' : '';
+                            echo "<option value='$region' $selected>+ $region</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <input type="text" class="form-control" placeholder="Enter your phone Number" name="phonenumber" autocomplete="off" value="<?php echo $phonenumber; ?>" required>
             </div>
+
             <button type="submit" class="btn btn-primary" name="submit">Update</button>
         </form>
     </div>
 
 </body>
+
 </html>
