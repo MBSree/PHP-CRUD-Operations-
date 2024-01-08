@@ -1,7 +1,6 @@
 <?php include("connection.php"); ?>
 <!doctype html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -38,11 +37,24 @@
             </div>
 
             <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" class="form-control" placeholder="Enter your phone Number" name="phonenumber" autocomplete="off" required>
+                <label>Phone Number</label><br>
+                <select name="countrycode" class="form-control">
+                    <option disabled="disabled" selected="selected">Country Code</option>
+                    <?php
+                    include 'vendor/autoload.php';
+                    use libphonenumber\PhoneNumberUtil;
+                    $phoneUtil = PhoneNumberUtil::getInstance();
+                    $regions = $phoneUtil->getSupportedRegions();
+                    foreach($regions as $countrycode){
+                        echo "<option value=".$countrycode."> +".$phoneUtil->getCountryCodeForRegion($countrycode)."</option>";
+                    }
+                    ?>
+                </select>
+                <input type="text" class="form-control" placeholder="Enter your phone Number" name="phonenumber" autocomplete="off" required>
             </div>
 
-            <input type="hidden"  name="create_hidden" value="create">
+
+            <input type="hidden" name="create_hidden" value="create">
             <button type="submit" class="btn btn-primary" name="submit">Submit</button>
         </form>
     </div>
@@ -57,7 +69,7 @@ include("connection.php");
 include("Validation.php");
 
 
-$validationObject = new Validation();
+// $validationObject = new Validation();
 
 // function isUniqueEmail($email, $conn)
 // {
@@ -110,26 +122,27 @@ if (isset($_POST['submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $address = $_POST['address'];
+    $countrycode=$_POST['countrycode'];
     $phonenumber = $_POST['phonenumber'];
 
-    $hidden = $_POST["create_hidden"];
-    
+    // $hidden = $_POST["create_hidden"];
 
-    $isValidEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
-    $isAllowedDomain = $validationObject->isAllowedDomain($email);
-    // $isUniqueEmail = isUniqueEmail($email, $conn);
-    // $isValidPassword = isValidPassword($password);
-    // $isValidPhoneNumber = isValidPhoneNumber($phonenumber);
-    $isUniqueEmail = $validationObject->isUniqueEmail($email, $id=null, $conn);
-    $isValidPassword = $validationObject->isValidPassword($password);
-    $isValidPhoneNumber = $validationObject->isValidPhoneNumber($phonenumber);
 
-    if (!$isValidEmail) {
-        echo "<script>alert('Invalid email address.');</script>";
-    }
+    $ValidEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
+    $isAllowedDomain = isValidEmail($email);
+    $isUniqueEmail = isUniqueEmail($email, $id = null, $conn);
+    $isValidPassword = isValidPassword($password);
+    $isValidPhoneNumber = isValidPhoneNumber($phonenumber,$countrycode);
+    // $isUniqueEmail = $validationObject->isUniqueEmail($email, $id=null, $conn);
+    // $isValidPassword = $validationObject->isValidPassword($password);
+    // $isValidPhoneNumber = $validationObject->isValidPhoneNumber($phonenumber);
+
+    // if (!$isValidEmail) {
+    //     echo "<script>alert('Invalid email address.');</script>";
+    // }
 
     if (!$isAllowedDomain) {
-        echo "<script>alert('Sorry, registration is only allowed for specific email domains of " . implode(', ', Validation::ALLOWED_DOMAINS) . ".');</script>";
+        echo "<script>alert('Sorry, registration is only allowed for specific email domains of " . implode(',', $allowedDomains) . ".');</script>";
     }
 
     if (!$isUniqueEmail) {
@@ -140,21 +153,19 @@ if (isset($_POST['submit'])) {
         echo "<script>alert('Password must be between 6 and 20 characters and contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special character.');</script>";
     }
 
-    if (!$isValidPhoneNumber){
+    if (!$isValidPhoneNumber) {
         echo "<script>alert('Invald Phone Number.');</script>";
     }
 
-    if ($isValidEmail && $isAllowedDomain && $isUniqueEmail && $isValidPassword && $isValidPhoneNumber) {
-        $query = "INSERT INTO employee(username,email,password,address,phonenumber) VALUES('$username','$email','$password','$address','$phonenumber')";
+    if ($ValidEmail && $isAllowedDomain && $isUniqueEmail && $isValidPassword && $isValidPhoneNumber) {
+        $query = "INSERT INTO employee(username,email,password,address,countrycode,phonenumber) VALUES('$username','$email','$password','$address','$countrycode','$phonenumber')";
         $result = mysqli_query($conn, $query);
 
         if ($result) {
-            //echo "<script>alert('Data insertion is successfull.');</script>";
-            header('location: display.php');
+            echo '<meta http-equiv="refresh" content="0;url=display.php">';
         } else {
             echo "<script>alert('Data not inserted. Failed!!!');</script>";
         }
-
     }
 }
 ?>
