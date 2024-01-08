@@ -46,7 +46,7 @@
                     $phoneUtil = PhoneNumberUtil::getInstance();
                     $regions = $phoneUtil->getSupportedRegions();
                     foreach($regions as $countrycode){
-                        echo "<option value=".$countrycode."> +".$phoneUtil->getCountryCodeForRegion($countrycode)."</option>";
+                        echo "<option value=".$countrycode."> ".$countrycode."</option>";
                     }
                     ?>
                 </select>
